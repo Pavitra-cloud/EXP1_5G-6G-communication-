@@ -1,1 +1,47 @@
+clc;
+clear;
+close all;
 
+% Sampling parameters
+Fs = 1000;                  % Sampling frequency (Hz)
+time = 0:1/Fs:1;            % Time vector
+
+% FDMA Parameters
+totalBandwidth = 600;       % Total bandwidth (kHz)
+numUsers = 3;               % Number of users
+channelBandwidth = totalBandwidth / numUsers;
+
+% Carrier frequencies for each user
+carrierFreq = [100, 300, 500];
+
+% Message signal
+message = sin(2*pi*10*time);
+
+% Generate FDMA signals
+fdmaSignal = zeros(numUsers, length(time));
+
+for i = 1:numUsers
+    fdmaSignal(i,:) = message .* cos(2*pi*carrierFreq(i)*time);
+end
+
+% Display FDMA signals
+figure;
+
+subplot(2,1,1);
+plot(time, fdmaSignal(1,:), 'r', ...
+    time, fdmaSignal(2,:), 'g', ...
+    time, fdmaSignal(3,:), 'b');
+grid on;
+title('FDMA Channel Allocation');
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('User 1','User 2','User 3');
+
+% Display bandwidth allocation
+subplot(2,1,2);
+bandwidth = repmat(channelBandwidth,1,numUsers);
+bar(1:numUsers, bandwidth);
+grid on;
+xlabel('Users');
+ylabel('Channel Bandwidth (kHz)');
+title('Channel Bandwidth per User');
