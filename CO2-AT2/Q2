@@ -1,1 +1,84 @@
+clc;
+clear;
+close all;
+
+%% LTE Protocol Stack Delay Simulation
+
+% Packet sizes in Bytes
+packet_size = [256 512 1024 1500];
+
+% Uplink traffic (Mbps)
+uplink = [2 4 6 8];
+
+% Downlink traffic (Mbps)
+downlink = [5 10 15 20];
+
+% Retransmission count
+retransmission = [0 1 2 3];
+
+% Channel Quality (SNR in dB)
+SNR = [5 10 15 20];
+
+% Fixed protocol stack delays (milliseconds)
+PHY_delay = 1;
+MAC_delay = 2;
+RLC_delay = 3;
+PDCP_delay = 1;
+RRC_delay = 2;
+
+% Initialize total delay matrix
+total_delay = zeros(length(packet_size), length(SNR));
+
+%% Delay Calculation
+
+for i = 1:length(packet_size)
+
+    for j = 1:length(SNR)
+
+        % Packet transmission delay (ms)
+        tx_delay = (packet_size(i)*8)/(downlink(j)*1e6)*1000;
+
+        % Retransmission delay
+        retx_delay = retransmission(j) * 2;
+
+        % Channel quality effect
+        channel_delay = 20 / SNR(j);
+
+        % Total LTE protocol stack delay
+        total_delay(i,j) = PHY_delay + MAC_delay + ...
+            RLC_delay + PDCP_delay + ...
+            RRC_delay + tx_delay + ...
+            retx_delay + channel_delay;
+
+    end
+
+end
+
+%% Display Delay Table
+
+disp('Total LTE Protocol Stack Delay (ms)')
+
+disp(array2table(total_delay,...
+    'VariableNames',compose('SNR_%d',SNR),...
+    'RowNames',compose('%dBytes',packet_size)))
+
+%% Plot Results
+
+figure
+
+plot(SNR,total_delay(1,:),'-o','LineWidth',2)
+hold on
+
+plot(SNR,total_delay(2,:),'-s','LineWidth',2)
+plot(SNR,total_delay(3,:),'-d','LineWidth',2)
+plot(SNR,total_delay(4,:),'-^','LineWidth',2)
+
+grid on
+
+xlabel('Channel Quality (SNR in dB)')
+ylabel('Total Delay (ms)')
+title('LTE Protocol Stack Delay Analysis')
+
+legend('256 Bytes','512 Bytes','1024 Bytes','1500 Bytes','Location','northeast')
+
 
