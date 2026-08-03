@@ -1,1 +1,75 @@
+clc;
+clear;
+close all;
+
+%% LTE Throughput Performance Simulation
+
+% Bandwidth values (MHz)
+bandwidth = [1.4 3 5 10 15 20];
+
+% Signal-to-Noise Ratio (dB)
+SNR = 0:5:30;
+
+% Modulation order (Bits/Symbol)
+% QPSK=2, 16QAM=4, 64QAM=6
+modulation = 6;
+
+% Coding rate
+coding_rate = 0.75;
+
+% Number of active users
+users = 20;
+
+% Spectral efficiency calculation
+spectral_efficiency = coding_rate * modulation .* log2(1 + 10.^(SNR/10));
+
+% Initialize throughput matrix
+throughput = zeros(length(bandwidth), length(SNR));
+
+%% Throughput Calculation
+
+for i = 1:length(bandwidth)
+
+    % Convert bandwidth from MHz to Hz
+    BW = bandwidth(i) * 1e6;
+
+    for j = 1:length(SNR)
+
+        % LTE Throughput
+        throughput(i,j) = (BW * spectral_efficiency(j))/users;
+
+    end
+
+end
+
+% Convert to Mbps
+throughput = throughput/1e6;
+
+%% Plot Results
+
+figure;
+
+plot(SNR,throughput(1,:),'-o','LineWidth',2);
+hold on;
+
+plot(SNR,throughput(2,:),'-s','LineWidth',2);
+plot(SNR,throughput(3,:),'-d','LineWidth',2);
+plot(SNR,throughput(4,:),'-^','LineWidth',2);
+plot(SNR,throughput(5,:),'-v','LineWidth',2);
+plot(SNR,throughput(6,:),'-*','LineWidth',2);
+
+grid on;
+
+xlabel('SNR (dB)');
+ylabel('Throughput (Mbps)');
+title('LTE Throughput under Different Bandwidths');
+
+legend('1.4 MHz','3 MHz','5 MHz','10 MHz','15 MHz','20 MHz','Location','northwest');
+
+%% Display Throughput Table
+
+disp('Throughput (Mbps)')
+disp(array2table(throughput,...
+    'VariableNames',compose('SNR_%d',SNR),...
+    'RowNames',compose('BW_%gMHz',bandwidth)));
 
